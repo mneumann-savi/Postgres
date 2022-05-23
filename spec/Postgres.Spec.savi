@@ -1,0 +1,6 @@
+:class Postgres.Spec
+  :is Spec
+  :const describes: "Postgres"
+
+  :it "has a placeholder method for demonstrating testing"
+    assert: Postgres.placeholder == True
