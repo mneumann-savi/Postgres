@@ -1,0 +1,9 @@
+:class MessageEncoder.Spec
+  :is Spec
+  :const describes: "MessageEncoder"
+
+  :it "encodes a startup message"
+    assert: _MessageEncoder.startup_message("dbuser", "db") == b"\x00\x00\x00!\x00\x03\x00\x00user\x00dbuser\x00database\x00db\x00\x00"
+
+  :it "encodes a query message"
+    assert: _MessageEncoder.query_message("SELECT * FROM articles") == b"Q\x00\x00\x00\x1bSELECT * FROM articles\x00"
