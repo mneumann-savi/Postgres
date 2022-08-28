@@ -1,11 +1,11 @@
 :module _MessageEncoder
 
-  :fun startup_message(user String'val, database String'val, protocol_version = U32[3].bit_shl(16)) Bytes'iso
-    param_user = Pair(String'val).new("user", user)
-    param_db = Pair(String'val).new("database", database)
+  :fun startup_message(user String, database String, protocol_version = U32[3].bit_shl(16)) Bytes'iso
+    param_user = Pair(String).new("user", user)
+    param_db = Pair(String).new("database", database)
     --@_startup_message([param_user, param_db], protocol_version)
 
-  :fun _startup_message(params Array(Pair(String'val)), protocol_version U32) Bytes'iso
+  :fun _startup_message(params Array(Pair(String)), protocol_version U32) Bytes'iso
     len USize = USize[4] + 4
     params.each -> (pair |
       len = len + pair.first.size + 1 + pair.second.size + 1
@@ -25,7 +25,7 @@
     msg.push(0)
     --msg
 
-  :fun query_message(query String'val) Bytes'iso
+  :fun query_message(query String) Bytes'iso
     len USize = USize[4] + query.size + 1
     msg = Bytes.new_iso(len)
     msg.push('Q')
