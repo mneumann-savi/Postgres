@@ -1,25 +1,35 @@
 :module _MessageEncoder
+
   :fun startup_message(user String'val, database String'val, protocol_version = U32[3].bit_shl(16)) Bytes'iso
-    msg = Bytes.new_iso
-    msg.push_native_u32(0) // message length placeholder
+    param_user = Pair(String'val).new("user", user)
+    param_db = Pair(String'val).new("database", database)
+    --@_startup_message([param_user, param_db], protocol_version)
+
+  :fun _startup_message(params Array(Pair(String'val)), protocol_version U32) Bytes'iso
+    len USize = USize[4] + 4
+    params.each -> (pair |
+      len = len + pair.first.size + 1 + pair.second.size + 1
+    )
+    len = len + 1
+
+    msg = Bytes.new_iso(len)
+    msg.push_native_u32(len.u32.native_to_be)
     msg.push_native_u32(protocol_version.native_to_be)
-    msg << b"user"
+
+    params.each -> (pair |
+      msg << pair.first.as_bytes
+      msg.push(0)
+      msg << pair.second.as_bytes
+      msg.push(0)
+    )
     msg.push(0)
-    msg << user.as_bytes
-    msg.push(0)
-    msg << b"database"
-    msg.push(0)
-    msg << database.as_bytes
-    msg.push(0)
-    msg.push(0)
-    try msg.write_native_u32!(0, msg.size.u32.native_to_be)
     --msg
 
   :fun query_message(query String'val) Bytes'iso
-    msg = Bytes.new_iso
+    len USize = USize[4] + query.size + 1
+    msg = Bytes.new_iso(len)
     msg.push('Q')
-    msg.push_native_u32(0) // message length placeholder
+    msg.push_native_u32(len.u32.native_to_be)
     msg << query.as_bytes
     msg.push(0)
-    try msg.write_native_u32!(1, (msg.size - 1).u32.native_to_be)
     --msg
