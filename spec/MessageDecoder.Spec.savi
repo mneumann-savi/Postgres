@@ -1,0 +1,35 @@
+:class MessageDecoder.Spec
+  :is Spec
+  :const describes: "MessageDecoder"
+
+  :it "decodes NUL terminated cstring's"
+    stream = ByteStream.Reader.new
+    write_stream = ByteStream.Writer.to_reader(stream)
+    write_stream << b"foo\x00bar\x00"
+    assert no_error: write_stream.flush!
+
+    assert: _MessageDecoder._cstring!(stream) == "foo"
+    assert: _MessageDecoder._cstring!(stream) == "bar"
+    assert: stream.bytes_ahead == 0
+
+  :it "decodes a _FieldsInfo"
+    stream = ByteStream.Reader.new
+    write_stream = ByteStream.Writer.to_reader(stream)
+    write_stream << b"id\x00"			// name
+    write_stream << b"\x11\x22\x33\x44"		// oid
+    write_stream << b"\x55\x55"			// attr_nr
+    write_stream << b"\x12\x22\x33\x44"		// type_oid
+    write_stream << b"\x00\x01"			// typlen
+    write_stream << b"\x44\x33\x22\x11"		// atttypmod
+    write_stream << b"\x00\x05"			// formatcode
+    assert no_error: write_stream.flush!
+
+    assert: _MessageDecoder._decode_field_info!(stream) == _FieldInfo.new(
+      "id"
+      0x11223344
+      0x5555
+      0x12223344
+      0x0001
+      0x44332211
+      0x0005)
+    assert: stream.bytes_ahead == 0

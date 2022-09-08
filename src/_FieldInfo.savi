@@ -1,0 +1,19 @@
+:struct val _FieldInfo
+  :let name String
+  :let oid I32
+  :let attr_nr I16
+  :let type_oid I32
+  :let typlen I16
+  :let atttypmod I32
+  :let formatcode I16
+
+  :new (@name, @oid, @attr_nr, @type_oid, @typlen, @atttypmod, @formatcode)
+
+  :fun "=="(other _FieldInfo'box) Bool
+    @name == other.name &&
+    @oid == other.oid &&
+    @attr_nr == other.attr_nr &&
+    @type_oid == other.type_oid &&
+    @typlen == other.typlen &&
+    @atttypmod == other.atttypmod &&
+    @formatcode == other.formatcode

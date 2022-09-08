@@ -3,4 +3,5 @@
     Spec.Process.run(env, [
       Spec.Run(Postgres.Spec).new(env)
       Spec.Run(MessageEncoder.Spec).new(env)
+      Spec.Run(MessageDecoder.Spec).new(env)
     ])
