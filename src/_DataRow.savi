@@ -1,0 +1,20 @@
+:struct _DataRow
+  :let columns Array((Bytes'val | None))
+
+  :new (@columns)
+
+  :fun box inspect String'iso
+    output = String.new_iso
+    output.push_byte('[')
+    @columns.each -> (column |
+      case column <: (
+      | None |
+        output << "NULL"
+      | Bytes |
+        output << Inspect[column]
+      )
+      output << ", "
+    )
+    output.push_byte(']')
+    --output
+

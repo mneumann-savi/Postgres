@@ -10,11 +10,31 @@
       @_i16!(rd)	// formatcode
     )
 
+  :fun _decode_data_row!(rd ByteStream.Reader'ref) _DataRow
+    num_columns = @_u16!(rd).usize
+    columns = Array((Bytes | None)).new(num_columns)
+    num_columns.times -> (|
+      column_size = @_u32!(rd).usize
+
+      if (column_size == 0xFFFF_FFFF) (
+        columns.push(None)
+      |
+        columns.push(--rd.mark_here.advance!(column_size).extract_token)
+      )
+    )
+    _DataRow.new(columns)
+
+  :fun _u32!(rd ByteStream.Reader'ref) U32
+    rd.take_native_u32!.native_to_be
+
   :fun _i32!(rd ByteStream.Reader'ref) I32
-    rd.take_native_u32!.native_to_be.i32
+    @_u32!(rd).i32
+
+  :fun _u16!(rd ByteStream.Reader'ref) U16
+    rd.take_native_u16!.native_to_be
 
   :fun _i16!(rd ByteStream.Reader'ref) I16
-    rd.take_native_u16!.native_to_be.i16
+    @_u16!(rd).i16
 
   :fun _cstring!(rd ByteStream.Reader'ref) String
     rd.mark_here

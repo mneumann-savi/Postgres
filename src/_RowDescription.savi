@@ -1,0 +1,4 @@
+:struct _RowDescription
+  :let fields Array(_FieldInfo)
+
+  :new (@fields)

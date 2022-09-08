@@ -33,3 +33,28 @@
       0x44332211
       0x0005)
     assert: stream.bytes_ahead == 0
+
+  :it "decodes an empty _DataRow"
+    stream = ByteStream.Reader.new
+    write_stream = ByteStream.Writer.to_reader(stream)
+    write_stream << b"\x00\x00"			// row contains no columns
+    assert no_error: write_stream.flush!
+    assert: _MessageDecoder._decode_data_row!(stream).columns == []
+    assert: stream.bytes_ahead == 0
+
+  :it "decodes a _DataRow"
+    stream = ByteStream.Reader.new
+    write_stream = ByteStream.Writer.to_reader(stream)
+    write_stream << b"\x00\x02"			// row contains two columns
+    write_stream << b"\xFF\xFF\xFF\xFF"		// first column is NULL
+    write_stream << b"\x00\x00\x00\x06"		// second column contains "foobar"
+    write_stream << b"foobar"
+    assert no_error: write_stream.flush!
+
+    assert no_error: (
+      columns = _MessageDecoder._decode_data_row!(stream).columns
+      assert: columns[0]! <: None
+      assert: columns[1]!.as!(Bytes) == b"foobar"
+    )
+    assert: stream.bytes_ahead == 0
+
