@@ -1,15 +1,4 @@
 :module _MessageDecoder
-  :fun _decode_field_info!(rd ByteStream.Reader'ref) _FieldInfo
-    _FieldInfo.new(
-      @_cstring!(rd)	// name
-      @_i32!(rd)	// oid
-      @_i16!(rd)	// attr_nr
-      @_i32!(rd)	// type_oid
-      @_i16!(rd)	// typelen
-      @_i32!(rd)	// atttypmod
-      @_i16!(rd)	// formatcode
-    )
-
   :fun _decode_data_row!(rd ByteStream.Reader'ref) _DataRow
     num_columns = @_u16!(rd).usize
     columns = Array((Bytes | None)).new(num_columns)
@@ -23,6 +12,26 @@
       )
     )
     _DataRow.new(columns)
+
+  :fun _decode_row_description!(rd ByteStream.Reader'ref) _RowDescription
+    num_fields = @_u16!(rd).usize
+    fields = Array(_FieldInfo).new(num_fields)
+    num_fields.times -> (|
+      fields.push(@_decode_field_info!(rd))
+    )
+    _RowDescription.new(fields)
+
+  :fun _decode_field_info!(rd ByteStream.Reader'ref) _FieldInfo
+    _FieldInfo.new(
+      @_cstring!(rd)	// name
+      @_i32!(rd)	// oid
+      @_i16!(rd)	// attr_nr
+      @_i32!(rd)	// type_oid
+      @_i16!(rd)	// typelen
+      @_i32!(rd)	// atttypmod
+      @_i16!(rd)	// formatcode
+    )
+
 
   :fun _u32!(rd ByteStream.Reader'ref) U32
     rd.take_native_u32!.native_to_be
